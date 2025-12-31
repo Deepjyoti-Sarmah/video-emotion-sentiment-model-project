@@ -30,6 +30,9 @@ class MELDDataset(Dataset):
 
         try:
             if not cap.isOpened():
+                raise ValueError(f"Video not found: {video_path}")
+
+            # Try and read first frame to validate video
 
         except Exception as e:
             raise ValueError(f"Video errors: {str(e)}")
