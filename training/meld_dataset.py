@@ -41,7 +41,7 @@ class MELDDataset(Dataset):
 
         if video_path_exists == False:
             raise FileNotFoundError(f"No video found for filename: {path}")
-        
+
         print("File found")
 
 
