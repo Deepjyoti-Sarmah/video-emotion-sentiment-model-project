@@ -5,6 +5,8 @@ import os
 import cv2
 import numpy as np
 import torch
+import subprocess
+import torchaudio
 
 
 class MELDDataset(Dataset):
@@ -70,6 +72,60 @@ class MELDDataset(Dataset):
         # After permute: [frames, channels, height, width]
         return torch.FloatTensor(np.array(frames)).permute(0, 3, 1, 2)
 
+    def _extract_audio_features(self, video_path):
+        audio_path = video_path.replace(".mp4", ".wav")
+
+        try:
+            subprocess.run(
+                [
+                    "ffmpeg",
+                    "-i",
+                    video_path,
+                    "-vn",
+                    "-acodec",
+                    "pcm_s16le",
+                    "-ar",
+                    "16000",
+                    "-ac",
+                    "1",
+                    audio_path,
+                ],
+                check=True,
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
+            )
+
+            waveform, sample_rate = torchaudio.load(audio_path)
+
+            if sample_rate != 16000:
+                resampler = torchaudio.transforms.Resample(sample_rate, 16000)
+                waveform = resampler(waveform)
+
+            mel_spectogram = torchaudio.transforms.MelSpectrogram(
+                sample_rate=16000, n_mels=64, n_fft=1024, hop_length=512
+            )
+
+            mel_spec = mel_spectogram(waveform)
+
+            # Noramalize
+            mel_spec = (mel_spec - mel_spec.mean()) / mel_spec.std()
+
+            if mel_spec.size(2) < 300:
+                padding = 300 - mel_spec.size(2)
+                mel_spec = torch.nn.functional.pad(mel_spec, (0, padding))
+            else:
+                mel_spec = mel_spec[:, :, :300]
+
+            return mel_spec
+
+        except subprocess.CalledProcessError as e:
+            raise ValueError(f"Audio extraction error: {str(e)}")
+        except Exception as e:
+            raise ValueError(f"Audio error: {str(e)}")
+        finally:
+            if os.path.exists(audio_path):
+                os.remove(audio_path)
+
     def __len__(self):
         return len(self.data)
 
@@ -80,7 +136,7 @@ class MELDDataset(Dataset):
         path = os.path.join(self.video_dir, video_filename)
         video_path_exists = os.path.exists(path)
 
-        if video_path_exists == False:
+        if not video_path_exists:
             raise FileNotFoundError(f"No video found for filename: {path}")
 
         text_inputs = self.tokenizer(
@@ -91,10 +147,11 @@ class MELDDataset(Dataset):
             return_tensors="pt",
         )
 
-        video_frames = self._load_video_frames(path)
+        # video_frames = self._load_video_frames(path)
+        self._extract_audio_features(path)
 
-        print(text_inputs)
-        print(video_frames)
+        # print(text_inputs)
+        # print(video_frames)
 
 
 if __name__ == "__main__":
