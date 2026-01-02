@@ -101,13 +101,13 @@ class MELDDataset(Dataset):
                 resampler = torchaudio.transforms.Resample(sample_rate, 16000)
                 waveform = resampler(waveform)
 
-            mel_spectogram = torchaudio.transforms.MelSpectrogram(
+            mel_spectrogram = torchaudio.transforms.MelSpectrogram(
                 sample_rate=16000, n_mels=64, n_fft=1024, hop_length=512
             )
 
-            mel_spec = mel_spectogram(waveform)
+            mel_spec = mel_spectrogram(waveform)
 
-            # Noramalize
+            # Normalize
             mel_spec = (mel_spec - mel_spec.mean()) / mel_spec.std()
 
             if mel_spec.size(2) < 300:
@@ -147,11 +147,12 @@ class MELDDataset(Dataset):
             return_tensors="pt",
         )
 
-        # video_frames = self._load_video_frames(path)
-        self._extract_audio_features(path)
+        video_frames = self._load_video_frames(path)
+        audio_features = self._extract_audio_features(path)
 
-        # print(text_inputs)
-        # print(video_frames)
+        print(text_inputs)
+        print(video_frames)
+        print(audio_features)
 
 
 if __name__ == "__main__":
