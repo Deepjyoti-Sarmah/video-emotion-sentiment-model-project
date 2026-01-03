@@ -105,7 +105,10 @@ class MELDDataset(Dataset):
                 waveform = resampler(waveform)
 
             mel_spectrogram = torchaudio.transforms.MelSpectrogram(
-                sample_rate=16000, n_mels=64, n_fft=1024, hop_length=512
+                sample_rate=16000,
+                n_mels=64,
+                n_fft=1024,
+                hop_length=512,
             )
 
             mel_spec = mel_spectrogram(waveform)
@@ -198,14 +201,24 @@ def prepare_dataloaders(
     test_dataset = MELDDataset(test_csv, test_video_dir)
 
     train_loader = DataLoader(
-        train_dataset, batch_size=batch_size, shuffle=True, collate_fn=collate_fn
+        train_dataset,
+        batch_size=batch_size,
+        shuffle=True,
+        collate_fn=collate_fn,
     )
 
     dev_loader = DataLoader(
-        dev_dataset, batch_size=batch_size, shuffle=True, collate_fn=collate_fn
+        dev_dataset,
+        batch_size=batch_size,
+        shuffle=True,
+        collate_fn=collate_fn,
     )
 
-    test_loader = DataLoader(test_dataset, batch_size=batch_size, collate_fn=collate_fn)
+    test_loader = DataLoader(
+        test_dataset,
+        batch_size=batch_size,
+        collate_fn=collate_fn,
+    )
 
     return train_loader, dev_loader, test_loader
 
