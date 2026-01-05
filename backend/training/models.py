@@ -1,8 +1,11 @@
+import os
 import torch
 import torch.nn as nn
 from torch.utils.data import dataset
 from transformers import BertModel
 from torchvision import models as vision_models
+from torch.utils.tensorboard import SummaryWriter
+from datetime import datetime
 
 from meld_dataset import MELDDataset
 
@@ -148,6 +151,29 @@ class MultimodalSentimentModel(nn.Module):
             "emotions": emotion_output,
             "sentiments": sentiment_output,
         }
+
+
+class MultimodalTrainer:
+    def __init__(self, model, train_loader, val_loader):
+        self.model = model
+        self.train_loader = train_loader
+        self.val_loader = val_loader
+
+        # Log dataset sized
+        train_size = len(train_loader.dataset)
+        val_size = len(val_loader.dataset)
+        print("\nDataset sized:")
+        print(f"Training samples: {train_size:, }")
+        print(f"Validation samples: {val_size:, }")
+        print(f"Batches per epoch: {len(train_loader):, }")
+
+        timestamp = datetime.now().strftime("%b%d_%H-%M-%S")  # Dec17_14-22-35
+        base_dir = (
+            "/opt/ml/output/tensorboard" if "SM_MODEL_DIR" in os.environ else "runs"
+        )
+        log_dir = f"{base_dir}/run_{timestamp}"
+        self.writer = SummaryWriter(log_dir=log_dir)
+        self.global_step = 0
 
 
 if __name__ == "__main__":
