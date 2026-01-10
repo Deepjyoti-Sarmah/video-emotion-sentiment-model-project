@@ -267,6 +267,122 @@ class MultimodalTrainer:
             weight=self.sentiment_weights,
         )
 
+    def log_metrics(self, losses, metrics=None, phase="train"):
+        if phase == "train":
+            self.current_train_losses = losses
+        else:  # Validation phase
+            self.writer.add_scalar(
+                "loss/total/train",
+                self.current_train_losses["total"],
+                self.global_step,
+            )
+            self.writer.add_scalar(
+                "loss/total/val",
+                losses["total"],
+                self.global_step,
+            )
+
+            self.writer.add_scalar(
+                "loss/total/train",
+                self.current_train_losses["emotion"],
+                self.global_step,
+            )
+            self.writer.add_scalar(
+                "loss/total/val",
+                losses["emotion"],
+                self.global_step,
+            )
+
+            self.writer.add_scalar(
+                "loss/total/train",
+                self.current_train_losses["sentiment"],
+                self.global_step,
+            )
+            self.writer.add_scalar(
+                "loss/total/val",
+                losses["sentiment"],
+                self.global_step,
+            )
+
+        if metrics:
+            self.writer.add_scalar(
+                f"{phase}/emotion_precision",
+                metrics["emotion_precision"],
+                self.global_step,
+            )
+            self.writer.add_scalar(
+                f"{phase}/emotion_accuracy",
+                metrics["emotion_accuracy"],
+                self.global_step,
+            )
+            self.writer.add_scalar(
+                f"{phase}/sentiment_precision",
+                metrics["sentiment_precision"],
+                self.global_step,
+            )
+            self.writer.add_scalar(
+                f"{phase}/sentiment_accuracy",
+                metrics["sentiment_accuracy"],
+                self.global_step,
+            )
+
+    def train_epoch(self):
+        self.model.train()
+        running_loss = {
+            "total": 0,
+            "emotion": 0,
+            "sentiment": 0,
+        }
+
+        for batch in self.train_loader:
+            device = next(self.model.parameters()).device
+            text_inputs = {"input_ids": batch["text_inputs"]["input_ids"].to(device)}
+            video_frames = batch["video_frames"].to(device)
+            audio_features = batch["audio_features"].to(device)
+            emotion_labels = batch["emotion_label"].to(device)
+            sentiment_labels = batch["sentiment_label"].to(device)
+
+            # Zero gradient
+            self.optimizer.zero_grad()
+
+            # Forward pass
+            outputs = self.model(text_inputs, video_frames, audio_features)
+
+            # Calculate losses using raw logits
+            emotion_loss = self.emotion_criterion(outputs["emotions"], emotion_labels)
+            sentiment_loss = self.sentiment_criterion(
+                outputs["sentiments"], sentiment_labels
+            )
+            total_loss = emotion_loss + sentiment_loss
+
+            # Backward pass. Calculate gradient
+            total_loss.backward()
+
+            # gradient clipping
+            torch.nn.utils.clip_grad_norm_(
+                self.model.parameters(),
+                max_norm=1.0,
+            )
+
+            self.optimizer.step()
+
+            # Track losses
+            running_loss["total"] += total_loss.item()
+            running_loss["emotion"] += emotion_loss.item()
+            running_loss["sentiment"] += sentiment_loss.item()
+
+            self.log_metrics(
+                {
+                    "total": total_loss.item(),
+                    "emotion": emotion_loss.item(),
+                    "sentiment": sentiment_loss.item(),
+                }
+            )
+
+            self.global_step += 1
+
+        return {k: v / len(self.train_loader) for k, v in running_loss.items()}
+
 
 if __name__ == "__main__":
     dataset = MELDDataset(
