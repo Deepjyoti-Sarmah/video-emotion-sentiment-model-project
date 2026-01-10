@@ -336,7 +336,10 @@ class MultimodalTrainer:
 
         for batch in self.train_loader:
             device = next(self.model.parameters()).device
-            text_inputs = {"input_ids": batch["text_inputs"]["input_ids"].to(device)}
+            text_inputs = {
+                "input_ids": batch["text_inputs"]["input_ids"].to(device),
+                "attention_mask": batch["text_inputs"]["attention_mask"].to(device),
+            }
             video_frames = batch["video_frames"].to(device)
             audio_features = batch["audio_features"].to(device)
             emotion_labels = batch["emotion_label"].to(device)
