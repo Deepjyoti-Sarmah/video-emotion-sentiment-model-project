@@ -438,6 +438,31 @@ class MultimodalTrainer:
             all_emotion_labels, all_emotion_preds, average="weighted"
         )
         emotion_accuracy = accuracy_score(all_emotion_labels, all_emotion_preds)
+        sentiment_precision = precision_score(
+            all_sentiment_labels, all_sentiment_preds, average="weighted"
+        )
+        sentiment_accuracy = accuracy_score(all_sentiment_labels, all_sentiment_preds)
+
+        self.log_metrics(
+            avg_loss,
+            {
+                "emotion_precision": emotion_precision,
+                "emotion_accuracy": emotion_accuracy,
+                "sentiment_precision": sentiment_precision,
+                "sentiment_accuracy": sentiment_accuracy,
+            },
+            phase=phase,
+        )
+
+        if phase == "val":
+            self.scheduler.step(avg_loss["total"])
+
+        return avg_loss, {
+            "emotion_precision": emotion_precision,
+            "emotion_accuracy": emotion_accuracy,
+            "sentiment_precision": sentiment_precision,
+            "sentiment_accuracy": sentiment_accuracy,
+        }
 
 
 if __name__ == "__main__":
