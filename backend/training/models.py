@@ -6,6 +6,7 @@ from transformers import BertModel
 from torchvision import models as vision_models
 from torch.utils.tensorboard import SummaryWriter
 from datetime import datetime
+# from sklearn.metrics import precision_score, accuracy_score
 
 from meld_dataset import MELDDataset
 
@@ -385,6 +386,58 @@ class MultimodalTrainer:
             self.global_step += 1
 
         return {k: v / len(self.train_loader) for k, v in running_loss.items()}
+
+    def evaluate(self, data_loader, phase="val"):
+        self.model.eval()
+        losses = {"total": 0, "emotion": 0, "sentiment": 0}
+        all_emotion_preds = []
+        all_emotion_labels = []
+        all_sentiment_preds = []
+        all_sentiment_labels = []
+
+        with torch.inference_mode():
+            for batch in data_loader:
+                device = next(self.model.parameters()).device
+                text_inputs = {
+                    "input_ids": batch["text_inputs"]["input_ids"].to(device),
+                    "attention_mask": batch["text_inputs"]["attention_mask"].to(device),
+                }
+                video_frames = batch["video_frames"].to(device)
+                audio_features = batch["audio_features"].to(device)
+                emotion_labels = batch["emotion_label"].to(device)
+                sentiment_labels = batch["sentiment_label"].to(device)
+
+                outputs = self.model(text_inputs, video_frames, audio_features)
+
+                emotion_loss = self.emotion_criterion(
+                    outputs["emotions"], emotion_labels
+                )
+                sentiment_loss = self.sentiment_criterion(
+                    outputs["sentiments"], sentiment_labels
+                )
+                total_loss = emotion_loss + sentiment_loss
+
+                all_emotion_preds.extend(
+                    outputs["emotions"].argmex(dim=1).cpu().numpy()
+                )
+                all_emotion_labels.extend(emotion_labels.cpu().numpy())
+                all_sentiment_preds.extend(
+                    outputs["sentiments"].argmex(dim=1).cpu().numpy()
+                )
+                all_sentiment_labels.extend(sentiment_labels.cpu().numpy())
+
+                # Track losses
+                losses["total"] += total_loss.item()
+                losses["emotion"] += emotion_loss.item()
+                losses["sentiment"] += sentiment_loss.item()
+
+        avg_loss = {k: v / len(data_loader) for k, v in losses.items()}
+
+        # Compute the precision and accuracy
+        emotion_precision = precision_score(
+            all_emotion_labels, all_emotion_preds, average="weighted"
+        )
+        emotion_accuracy = accuracy_score(all_emotion_labels, all_emotion_preds)
 
 
 if __name__ == "__main__":
