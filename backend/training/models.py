@@ -6,7 +6,7 @@ from transformers import BertModel
 from torchvision import models as vision_models
 from torch.utils.tensorboard import SummaryWriter
 from datetime import datetime
-# from sklearn.metrics import precision_score, accuracy_score
+from sklearn.metrics import precision_score, accuracy_score
 
 from meld_dataset import MELDDataset
 
