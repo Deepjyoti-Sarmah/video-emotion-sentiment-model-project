@@ -217,13 +217,13 @@ class MultimodalTrainer:
         print(f"Validation samples: {val_size:, }")
         print(f"Batches per epoch: {len(train_loader):, }")
 
-        # timestamp = datetime.now().strftime("%b%d_%H-%M-%S")  # Dec17_14-22-35
-        # base_dir = (
-        #     "/opt/ml/output/tensorboard" if "SM_MODEL_DIR" in os.environ else "runs"
-        # )
-        # log_dir = f"{base_dir}/run_{timestamp}"
-        # self.writer = SummaryWriter(log_dir=log_dir)
-        # self.global_step = 0
+        timestamp = datetime.now().strftime("%b%d_%H-%M-%S")  # Dec17_14-22-35
+        base_dir = (
+            "/opt/ml/output/tensorboard" if "SM_MODEL_DIR" in os.environ else "runs"
+        )
+        log_dir = f"{base_dir}/run_{timestamp}"
+        self.writer = SummaryWriter(log_dir=log_dir)
+        self.global_step = 0
 
         # Very high: 1, high: 0.1-0.01, medium: 1e-1, low: 1e-4, very low: 1e-5
         self.optimizer = torch.optim.Adam(
