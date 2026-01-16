@@ -1,14 +1,14 @@
 import os
+from datetime import datetime
+
 import torch
 import torch.nn as nn
-from torch.utils.data import dataset
-from transformers import BertModel
-from torchvision import models as vision_models
-from torch.utils.tensorboard import SummaryWriter
-from datetime import datetime
-from sklearn.metrics import precision_score, accuracy_score
-
 from meld_dataset import MELDDataset
+from sklearn.metrics import accuracy_score, precision_score
+from torch.utils.data import dataset
+from torch.utils.tensorboard import SummaryWriter
+from torchvision import models as vision_models
+from transformers import BertModel
 
 
 class TextEncoder(nn.Module):
