@@ -273,35 +273,54 @@ class MultimodalTrainer:
         if phase == "train":
             self.current_train_losses = losses
         else:  # Validation phase
-            self.writer.add_scalar(
-                "loss/total/train",
-                self.current_train_losses["total"],
-                self.global_step,
-            )
+            # Check if we actually have training losses to compare against
+            if self.current_train_losses is not None:
+                self.writer.add_scalar(
+                    "loss/total/train",
+                    self.current_train_losses["total"],
+                    self.global_step,
+                )
+                self.writer.add_scalar(
+                    "loss/total/val",
+                    losses["total"],
+                    self.global_step,
+                )
+
+                self.writer.add_scalar(
+                    "loss/total/train",
+                    self.current_train_losses["emotion"],
+                    self.global_step,
+                )
+                self.writer.add_scalar(
+                    "loss/total/val",
+                    losses["emotion"],
+                    self.global_step,
+                )
+
+                self.writer.add_scalar(
+                    "loss/total/train",
+                    self.current_train_losses["sentiment"],
+                    self.global_step,
+                )
+                self.writer.add_scalar(
+                    "loss/total/val",
+                    losses["sentiment"],
+                    self.global_step,
+                )
+
+            # Log validation losses (these are always safe because 'losses' is passed in)
             self.writer.add_scalar(
                 "loss/total/val",
                 losses["total"],
                 self.global_step,
             )
-
             self.writer.add_scalar(
-                "loss/total/train",
-                self.current_train_losses["emotion"],
-                self.global_step,
-            )
-            self.writer.add_scalar(
-                "loss/total/val",
+                "loss/emotion/val",
                 losses["emotion"],
                 self.global_step,
             )
-
             self.writer.add_scalar(
-                "loss/total/train",
-                self.current_train_losses["sentiment"],
-                self.global_step,
-            )
-            self.writer.add_scalar(
-                "loss/total/val",
+                "loss/sentiment/val",
                 losses["sentiment"],
                 self.global_step,
             )
@@ -473,42 +492,47 @@ if __name__ == "__main__":
 
     sample = dataset[0]
 
-    model = MultimodalSentimentModel()
-    model.eval()
+    if sample is None:
+        print(
+            "Error: The dataset returned None. Check your file paths and Dialogue/Utterance IDs."
+        )
+    else:
+        model = MultimodalSentimentModel()
+        model.eval()
 
-    text_inputs = {
-        "input_ids": sample["text_inputs"]["input_ids"].unsqueeze(0),
-        "attention_mask": sample["text_inputs"]["attention_mask"].unsqueeze(0),
-    }
-    video_frames = sample["video_frames"].unsqueeze(0)
-    audio_features = sample["audio_features"].unsqueeze(0)
+        text_inputs = {
+            "input_ids": sample["text_inputs"]["input_ids"].unsqueeze(0),
+            "attention_mask": sample["text_inputs"]["attention_mask"].unsqueeze(0),
+        }
+        video_frames = sample["video_frames"].unsqueeze(0)
+        audio_features = sample["audio_features"].unsqueeze(0)
 
-    with torch.inference_mode():
-        outputs = model(text_inputs, video_frames, audio_features)
+        with torch.inference_mode():
+            outputs = model(text_inputs, video_frames, audio_features)
 
-        emotion_probs = torch.softmax(outputs["emotions"], dim=1)[0]
-        sentiment_probs = torch.softmax(outputs["sentiments"], dim=1)[0]
+            emotion_probs = torch.softmax(outputs["emotions"], dim=1)[0]
+            sentiment_probs = torch.softmax(outputs["sentiments"], dim=1)[0]
 
-    emotion_map = {
-        0: "anger",
-        1: "disgust",
-        2: "fear",
-        3: "joy",
-        4: "neutral",
-        5: "sadness",
-        6: "surprise",
-    }
+        emotion_map = {
+            0: "anger",
+            1: "disgust",
+            2: "fear",
+            3: "joy",
+            4: "neutral",
+            5: "sadness",
+            6: "surprise",
+        }
 
-    sentiment_map = {
-        0: "negative",
-        1: "neutral",
-        2: "positive",
-    }
+        sentiment_map = {
+            0: "negative",
+            1: "neutral",
+            2: "positive",
+        }
 
-    for i, prob in enumerate(emotion_probs):
-        print(f"{emotion_map[i]}: {prob:.2f}")
+        for i, prob in enumerate(emotion_probs):
+            print(f"{emotion_map[i]}: {prob:.2f}")
 
-    for i, prob in enumerate(sentiment_probs):
-        print(f"{sentiment_map[i]}: {prob:.2f}")
+        for i, prob in enumerate(sentiment_probs):
+            print(f"{sentiment_map[i]}: {prob:.2f}")
 
-    print("Predictions for utterance")
+        print("Predictions for utterance")
