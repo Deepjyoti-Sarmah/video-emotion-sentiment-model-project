@@ -2,7 +2,18 @@ from collections import namedtuple
 
 import torch
 from models import MultimodalSentimentModel, MultimodalTrainer
-from torch.utils.data import DataLoader
+from torch.utils.data import DataLoader, Dataset
+
+
+class MockDataset(Dataset):
+    def __init__(self, data):
+        self.data = data
+
+    def __len__(self):
+        return len(self.data)
+
+    def __getitem__(self, idx):
+        return self.data[idx]
 
 
 def test_logging():
@@ -12,7 +23,10 @@ def test_logging():
         video_frames=torch.ones(1),
         audio_features=torch.ones(1),
     )
-    mock_loader = DataLoader([mock_batch])
+
+    mock_dataset = MockDataset([mock_batch])
+    # mock_loader = DataLoader([mock_batch])
+    mock_loader = DataLoader(mock_dataset)
 
     model = MultimodalSentimentModel()
     trainer = MultimodalTrainer(model, mock_loader, mock_loader)
