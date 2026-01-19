@@ -34,7 +34,8 @@ class TextEncoder(nn.Module):
 class VideoEncoder(nn.Module):
     def __init__(self):
         super().__init__()
-        self.backbone = vision_models.video.r3d_18(pretrained=True)
+        # self.backbone = vision_models.video.r3d_18(pretrained=True)
+        self.backbone = vision_models.video.r3d_18(weights="DEFAULT")
 
         for param in self.backbone.parameters():
             param.requires_grad = False
@@ -213,9 +214,9 @@ class MultimodalTrainer:
         train_size = len(train_loader.dataset)
         val_size = len(val_loader.dataset)
         print("\nDataset sized:")
-        print(f"Training samples: {train_size:, }")
-        print(f"Validation samples: {val_size:, }")
-        print(f"Batches per epoch: {len(train_loader):, }")
+        print(f"Training samples: {train_size:,}")
+        print(f"Validation samples: {val_size:,}")
+        print(f"Batches per epoch: {len(train_loader):,}")
 
         timestamp = datetime.now().strftime("%b%d_%H-%M-%S")  # Dec17_14-22-35
         base_dir = (
@@ -233,7 +234,7 @@ class MultimodalTrainer:
                 {"params": model.audio_encoder.parameters(), "lr": 8e-5},
                 {"params": model.fusion_layer.parameters(), "lr": 5e-4},
                 {"params": model.emotion_classifier.parameters(), "lr": 5e-4},
-                {"params": model.segment_classifier.parameters(), "lr": 5e-4},
+                {"params": model.sentiment_classifier.parameters(), "lr": 5e-4},
             ],
             weight_decay=1e-5,
         )
