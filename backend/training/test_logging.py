@@ -1,4 +1,4 @@
-from collections import namedtuple
+# from collections import namedtuple
 
 import torch
 from models import MultimodalSentimentModel, MultimodalTrainer
