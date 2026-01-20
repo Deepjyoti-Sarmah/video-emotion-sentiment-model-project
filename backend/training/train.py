@@ -1,17 +1,14 @@
 import os
 import argparse
-import sys
-import json
-
-import torch
 import torchaudio
-
-
+import torch
 from tqdm import tqdm
-from backend.training.models import MultimodalSentimentModel, MultimodalTrainer
-from meld_dataset import prepare_dataloaders
-from install_ffmpeg import install_ffmpeg
+import json
+import sys
 
+from meld_dataset import prepare_dataloaders
+from models import MultimodalSentimentModel, MultimodalTrainer
+from install_ffmpeg import install_ffmpeg
 
 # AWS SageMaker
 SM_MODEL_DIR = os.environ.get("SM_MODEL_DIR", ".")
@@ -56,7 +53,7 @@ def main():
     if torch.cuda.is_available():
         torch.cuda.reset_peak_memory_stats()
         memory_used = torch.cuda.max_memory_allocated() / 1024**3
-        print(f"Intial GPU memory used: {memory_used:.2f} GB")
+        print(f"Initial GPU memory used: {memory_used:.2f} GB")
 
     train_loader, val_loader, test_loader = prepare_dataloaders(
         train_csv=os.path.join(args.train_dir, "train_sent_emo.csv"),
@@ -79,11 +76,7 @@ def main():
     trainer = MultimodalTrainer(model, train_loader, val_loader)
     best_val_loss = float("inf")
 
-    metrics_data = {
-        "train_losses": [],
-        "val_losses": [],
-        "epochs": [],
-    }
+    metrics_data = {"train_losses": [], "val_losses": [], "epochs": []}
 
     for epoch in tqdm(range(args.epochs), desc="Epochs"):
         train_loss = trainer.train_epoch()
@@ -129,9 +122,9 @@ def main():
         # Save best model
         if val_loss["total"] < best_val_loss:
             best_val_loss = val_loss["total"]
-            torch.save(model.state_dict(), os.path.join(args.model_dir, "model.path"))
+            torch.save(model.state_dict(), os.path.join(args.model_dir, "model.pth"))
 
-    # After traing is complete, evaluate on test set
+    # After training is complete, evaluate on test set
     print("Evaluating on test set...")
     test_loss, test_metrics = trainer.evaluate(test_loader, phase="test")
     metrics_data["test_loss"] = test_loss["total"]
