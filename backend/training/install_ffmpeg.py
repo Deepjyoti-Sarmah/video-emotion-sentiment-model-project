@@ -12,9 +12,10 @@ def install_ffmpeg():
     )
 
     try:
-        subprocess.check_call([sys.executable, "-m", "pip", "install", "Ffmpeg-python"])
+        subprocess.check_call([sys.executable, "-m", "pip", "install", "ffmpeg-python"])
+        print("Installed ffmpeg-python successfully")
     except subprocess.CalledProcessError as e:
-        print(f"Failed to install Ffmpeg-python via pip: {e}")
+        print(f"Failed to install ffmpeg-python via pip: {e}")
 
     try:
         subprocess.check_call(
@@ -50,6 +51,6 @@ def install_ffmpeg():
         print("FFmpeg version:")
         print(result.stdout)
         return True
-    except (subprocess.CalledProcessError, FileExistsError):
+    except (subprocess.CalledProcessError, FileNotFoundError):
         print("FFmpeg installation verification failed")
         return False

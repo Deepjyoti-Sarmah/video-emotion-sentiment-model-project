@@ -1,14 +1,15 @@
-import os
 import argparse
-import torchaudio
-import torch
-from tqdm import tqdm
 import json
+import os
 import sys
 
+import torch
+import torchaudio
+
+from install_ffmpeg import install_ffmpeg
 from meld_dataset import prepare_dataloaders
 from models import MultimodalSentimentModel, MultimodalTrainer
-from install_ffmpeg import install_ffmpeg
+from tqdm import tqdm
 
 # AWS SageMaker
 SM_MODEL_DIR = os.environ.get("SM_MODEL_DIR", ".")
@@ -80,6 +81,7 @@ def main():
         "train_losses": [],
         "val_losses": [],
         "epochs": [],
+        "test_loss": [],
     }
 
     for epoch in tqdm(range(args.epochs), desc="Epochs"):
@@ -131,7 +133,8 @@ def main():
     # After training is complete, evaluate on test set
     print("Evaluating on test set...")
     test_loss, test_metrics = trainer.evaluate(test_loader, phase="test")
-    metrics_data["test_loss"] = test_loss["total"]
+    # metrics_data["test_loss"] = test_loss["total"]
+    metrics_data["test_loss"].append(test_loss["total"])
 
     print(
         json.dumps(
