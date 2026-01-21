@@ -5,6 +5,7 @@ import sys
 
 import torch
 import torchaudio
+import torchaudio.utils
 
 from install_ffmpeg import install_ffmpeg
 from meld_dataset import prepare_dataloaders
@@ -45,7 +46,10 @@ def main():
         sys.exit(1)
 
     print("Available audio backends:")
-    print(str(torchaudio.list_audio_backends()))
+    # TODO: recheck
+    # print(str(torchaudio.list_audio_backends()))
+    # print(str(torchaudio.utils.get_audio_backends()))
+    print(str(torchaudio.__version__))
 
     args = parse_args()
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
