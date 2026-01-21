@@ -66,7 +66,7 @@ def main():
     )
 
     print(
-        f"""Training DSV path: {os.path.join(args.train_dir, "train_sent_emo.csv")}"""
+        f"""Training CSV path: {os.path.join(args.train_dir, "train_sent_emo.csv")}"""
     )
     print(
         f"""Training video directory: {os.path.join(args.train_dir, "train_splits")}"""
@@ -76,7 +76,11 @@ def main():
     trainer = MultimodalTrainer(model, train_loader, val_loader)
     best_val_loss = float("inf")
 
-    metrics_data = {"train_losses": [], "val_losses": [], "epochs": []}
+    metrics_data = {
+        "train_losses": [],
+        "val_losses": [],
+        "epochs": [],
+    }
 
     for epoch in tqdm(range(args.epochs), desc="Epochs"):
         train_loss = trainer.train_epoch()
