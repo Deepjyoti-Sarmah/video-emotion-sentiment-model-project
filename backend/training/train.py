@@ -5,7 +5,6 @@ import sys
 
 import torch
 import torchaudio
-import torchaudio.utils
 
 from install_ffmpeg import install_ffmpeg
 from meld_dataset import prepare_dataloaders
