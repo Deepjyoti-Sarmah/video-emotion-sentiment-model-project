@@ -3,12 +3,13 @@ from datetime import datetime
 
 import torch
 import torch.nn as nn
-from meld_dataset import MELDDataset
 from sklearn.metrics import accuracy_score, precision_score
 from torch.utils.data import dataset
 from torch.utils.tensorboard import SummaryWriter
 from torchvision import models as vision_models
 from transformers import BertModel
+
+from meld_dataset import MELDDataset
 
 
 class TextEncoder(nn.Module):
