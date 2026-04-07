@@ -3,13 +3,12 @@ from datetime import datetime
 
 import torch
 import torch.nn as nn
+from meld_dataset import MELDDataset
 from sklearn.metrics import accuracy_score, precision_score
 from torch.utils.data import dataset
 from torch.utils.tensorboard import SummaryWriter
 from torchvision import models as vision_models
 from transformers import BertModel
-
-from meld_dataset import MELDDataset
 
 
 class TextEncoder(nn.Module):
@@ -131,7 +130,7 @@ class MultimodalSentimentModel(nn.Module):
             text_inputs["input_ids"],
             text_inputs["attention_mask"],
         )
-        video_features = -self.video_encoder(video_frames)
+        video_features = self.video_encoder(video_frames)
         audio_features = self.audio_encoder(audio_features)
 
         # Concatenate multimodal features
@@ -289,23 +288,23 @@ class MultimodalTrainer:
                 )
 
                 self.writer.add_scalar(
-                    "loss/total/train",
+                    "loss/emotion/train",
                     self.current_train_losses["emotion"],
                     self.global_step,
                 )
                 self.writer.add_scalar(
-                    "loss/total/val",
+                    "loss/emotion/val",
                     losses["emotion"],
                     self.global_step,
                 )
 
                 self.writer.add_scalar(
-                    "loss/total/train",
+                    "loss/sentiment/train",
                     self.current_train_losses["sentiment"],
                     self.global_step,
                 )
                 self.writer.add_scalar(
-                    "loss/total/val",
+                    "loss/sentiment/val",
                     losses["sentiment"],
                     self.global_step,
                 )
@@ -440,11 +439,11 @@ class MultimodalTrainer:
                 total_loss = emotion_loss + sentiment_loss
 
                 all_emotion_preds.extend(
-                    outputs["emotions"].argmex(dim=1).cpu().numpy()
+                    outputs["emotions"].argmax(dim=1).cpu().numpy()
                 )
                 all_emotion_labels.extend(emotion_labels.cpu().numpy())
                 all_sentiment_preds.extend(
-                    outputs["sentiments"].argmex(dim=1).cpu().numpy()
+                    outputs["sentiments"].argmax(dim=1).cpu().numpy()
                 )
                 all_sentiment_labels.extend(sentiment_labels.cpu().numpy())
 
