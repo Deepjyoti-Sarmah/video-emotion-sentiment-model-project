@@ -31,6 +31,7 @@ def test_logging():
     #
     # model = MultimodalSentimentModel()
     # trainer = MultimodalTrainer(model, mock_loader, mock_loader)
+
     mock_batch = {
         "text_inputs": {
             "input_ids": torch.ones(1, 128, dtype=torch.long),
