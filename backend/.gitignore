@@ -1,2 +1,4 @@
 /dataset
 /training/__pycache__
+/runs/
+.venv
