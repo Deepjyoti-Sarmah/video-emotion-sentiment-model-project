@@ -193,6 +193,11 @@ def compute_class_weights(dataset):
     for i, count in enumerate(emotion_counts):
         print(f"{emotion_map[i]}: {count / valid:.2f}")
 
+    print("\nSentiments:")
+    sentiment_map = {0: "negative", 1: "neutral", 2: "positive"}
+    for i, count in enumerate(sentiment_counts):
+        print(f"{sentiment_map[i]}: {count / valid:.2f}")
+
     # Calculate class weights
     emotion_weights = 1.0 / emotion_counts
     sentiment_weights = 1.0 / sentiment_counts
