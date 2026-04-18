@@ -1,5 +1,5 @@
-from sagemaker.pytorch import PyTorch
 from sagemaker.debugger import TensorBoardOutputConfig
+from sagemaker.pytorch import PyTorch
 
 
 def start_training():
