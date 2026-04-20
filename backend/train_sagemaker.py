@@ -1,5 +1,5 @@
-from sagemaker.debugger import TensorBoardOutputConfig
-from sagemaker.pytorch import PyTorch
+from sagemaker.debugger.debugger import TensorBoardOutputConfig
+from sagemaker.pytorch.estimator import PyTorch
 
 
 def start_training():
@@ -17,10 +17,10 @@ def start_training():
         instance_count=1,
         instance_type="ml.g5.xlarge",
         hyperparameters={
-            "batch-size": 32,
-            "epochs": 25,
+            "batch-size": "32",
+            "epochs": "25",
         },
-        tensorboard_config=tensorboard_config,
+        tensorboard_output_config=tensorboard_config,
     )
 
     # Start training
