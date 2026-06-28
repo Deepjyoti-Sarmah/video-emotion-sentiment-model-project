@@ -144,8 +144,7 @@ class MELDDataset(Dataset):
         path = "Unknown Path"
 
         try:
-            video_filename = f"""dia{row["Dialogue_ID"]}_utt{
-                row["Utterance_ID"]}.mp4"""
+            video_filename = f"""dia{row["Dialogue_ID"]}_utt{row["Utterance_ID"]}.mp4"""
 
             path = os.path.join(self.video_dir, video_filename)
             video_path_exists = os.path.exists(path)
