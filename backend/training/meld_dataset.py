@@ -31,7 +31,11 @@ class MELDDataset(Dataset):
             "surprise": 6,
         }
 
-        self.sentiment_map = {"negative": 0, "neutral": 1, "positive": 2}
+        self.sentiment_map = {
+            "negative": 0,
+            "neutral": 1,
+            "positive": 2,
+        }
 
     def _load_video_frames(self, video_path):
         cap = cv2.VideoCapture(video_path)
