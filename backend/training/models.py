@@ -255,8 +255,7 @@ class MultimodalTrainer:
 
         # Calculate class weights
         print("\n Calculating class weight...")
-        emotion_weights, sentiment_weights = compute_class_weights(
-            train_loader.dataset)
+        emotion_weights, sentiment_weights = compute_class_weights(train_loader.dataset)
 
         device = next(model.parameters()).device
 
@@ -380,8 +379,7 @@ class MultimodalTrainer:
             outputs = self.model(text_inputs, video_frames, audio_features)
 
             # Calculate losses using raw logits
-            emotion_loss = self.emotion_criterion(
-                outputs["emotions"], emotion_labels)
+            emotion_loss = self.emotion_criterion(outputs["emotions"], emotion_labels)
             sentiment_loss = self.sentiment_criterion(
                 outputs["sentiments"], sentiment_labels
             )
@@ -465,13 +463,11 @@ class MultimodalTrainer:
         emotion_precision = precision_score(
             all_emotion_labels, all_emotion_preds, average="weighted"
         )
-        emotion_accuracy = accuracy_score(
-            all_emotion_labels, all_emotion_preds)
+        emotion_accuracy = accuracy_score(all_emotion_labels, all_emotion_preds)
         sentiment_precision = precision_score(
             all_sentiment_labels, all_sentiment_preds, average="weighted"
         )
-        sentiment_accuracy = accuracy_score(
-            all_sentiment_labels, all_sentiment_preds)
+        sentiment_accuracy = accuracy_score(all_sentiment_labels, all_sentiment_preds)
 
         self.log_metrics(
             avg_loss,

@@ -64,18 +64,15 @@ def main():
         dev_csv=os.path.join(args.val_dir, "dev_sent_emo.csv"),
         dev_video_dir=os.path.join(args.val_dir, "dev_splits_complete"),
         test_csv=os.path.join(args.test_dir, "test_sent_emo.csv"),
-        test_video_dir=os.path.join(
-            args.test_dir, "output_repeated_splits_test"),
+        test_video_dir=os.path.join(args.test_dir, "output_repeated_splits_test"),
         batch_size=args.batch_size,
     )
 
     print(
-        f"""Training CSV path: {os.path.join(
-            args.train_dir, "train_sent_emo.csv")}"""
+        f"""Training CSV path: {os.path.join(args.train_dir, "train_sent_emo.csv")}"""
     )
     print(
-        f"""Training video directory: {
-            os.path.join(args.train_dir, "train_splits")}"""
+        f"""Training video directory: {os.path.join(args.train_dir, "train_splits")}"""
     )
 
     model = MultimodalSentimentModel().to(device)
@@ -104,8 +101,7 @@ def main():
                 {
                     "metrics": [
                         {"Name": "train:loss", "Value": train_loss["total"]},
-                        {"Name": "validation:loss",
-                            "Value": val_loss["total"]},
+                        {"Name": "validation:loss", "Value": val_loss["total"]},
                         {
                             "Name": "validation:emotion_precision",
                             "Value": val_metrics["emotion_precision"],
@@ -134,8 +130,7 @@ def main():
         # Save best model
         if val_loss["total"] < best_val_loss:
             best_val_loss = val_loss["total"]
-            torch.save(model.state_dict(), os.path.join(
-                args.model_dir, "model.pth"))
+            torch.save(model.state_dict(), os.path.join(args.model_dir, "model.pth"))
 
     # After training is complete, evaluate on test set
     print("Evaluating on test set...")
